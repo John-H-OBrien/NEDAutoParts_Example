@@ -1,0 +1,194 @@
+{% comment %}
+Important notes about pagination:
+- Never access collection.products before the opening paginate tag.
+- Never paginate by more than 50.
+{% endcomment %}
+
+{% paginate collection.products by settings.pagination_limit %}
+
+{% comment %}
+Re-use the 'rte' class wherever you output content that was added by a merchant using
+the Rich Text Editor ( 'rte' stands for rich text editor ).
+Style all HTML elements in that content the same way across the board.
+Use the 'rte' class in your CSS to help maintain that consistency.
+Example: the h2 element should have the same size and color in:
+- product descriptions
+- collection descriptions
+- 'page' pages' content
+- blog post
+{% endcomment %}
+
+<div class="large-12 columns">
+  
+	<div class="row">
+      
+		<div class="bf-title">
+
+            <h1>{{ collection.title }}</h1>
+          
+      	</div>
+      
+      	<div class="large-12 columns">
+        
+            {% comment %}
+            Listing all tags within the current collection.
+            Shopify uses product tags to manage subcategories inside collections.
+            See 'How do I create subcategories of products?' at 
+            http://support.shopify.com/customer/portal/articles/75425 for details.
+            {% endcomment %}
+        <div class="large-12 columns vehicle-filter">
+        <ul class="clearfix">
+          <div class="large-2 columns">
+            <h4>Year</h4>
+          </div>
+          <div class="large-4 columns">
+          <li class="clearfix filter">
+            {% assign tags = '2014, 2013, 2012, 2011, 2010, 2009, 2008, 2007, 2006, 2005, 2004, 2003, 2002, 2001, 2000, 1999, 1998, 1997, 1996, 1995, 1994, 1993, 1992, 1991, 1990, 1989, 1988, 1987, 1986, 1985, 1984, 1983, 1982, 1981, 1980, 1979' | replace: ' ,', ',' | replace: ', ', ',' | split: ',' %}
+            <select class="coll-filter">
+              <option value="">All</option>
+              {% for tag in tags %}
+              {% if current_tags contains tag %}
+              <option value="{{ tag | handle }}" selected>{{ tag }}</option>
+              {% elsif collection.all_tags contains tag %}
+              <option value="{{ tag | handle }}">{{ tag }}</option>
+              {% endif %}
+              {% endfor %}
+            </select>
+          </li>
+          </div>
+          <div class="large-2 columns">
+            <h4>Make</h4>
+          </div>
+          <div class="large-4 columns">
+          <li class="clearfix filter">
+            {% assign tags_make = 'Acura, Audi, BMW, Chevrolet, Ford, Honda, Hyundai, Infiniti, Mazda, Mercedes-Benz, MINI, Mitsubishi, Nissan, Pontiac, Porsche, Saab, Scion, Subaru, Toyota, Volvo, Volkswagen' | replace: ' ,', ',' | replace: ', ', ',' | split: ',' %}
+            <select class="coll-filter">
+              <option value="">All</option>
+              {% for tag in tags_make %}
+              {% assign tagLower = tag | downcase %}
+              {% if current_tags contains tag %}
+              <option value="{{ tag | handle }}" selected>{{ tag }}</option>
+              {% elsif collection.all_tags contains tag or collection.all_tags contains tagLower %}
+              <option value="{{ tag | handle }}">{{ tag }}</option>
+              {% endif %}
+              {% endfor %}
+            </select>
+          </li>
+          </div>
+        </ul>
+            <div class="rte">
+        		<h2 style="text-align: center;">
+
+             		Can't find what you're looking for? Give Can't find what you're looking for? Give us a call, email us, or hit us up on Social Media. 
+
+ 
+					We're here to make your shopping season out of this world!us a cal…
+
+        		</h2>
+        			<p></p>
+        				<h2 style="text-align: center;"></h2>
+        				<h2 style="text-align: center;"></h2>
+        				<div style="text-align: center;"></div>
+    		</div>  
+        </div>
+
+
+</div>
+        
+
+        
+            {% if collection.description.size > 0 %}
+            <div class="rte">
+              {{ collection.description }}
+            </div>
+            {% endif %}
+          
+      </div>
+          
+    </div>
+    
+  	  
+    <div class="row">
+        <div class="large-12 columns">
+           	{% for product in collection.products %}
+            	{% include 'product-loop' %}
+            {% else %}
+                    <p>There are no products in this view.</p>
+            {% endfor %}
+        </div>
+    </div>
+  
+  	<div class="row">
+      
+      	<div class="large-12 columns">
+        
+            {% if paginate.pages > 1 %}
+                <div class="pagination-centered">
+                    <ul class="pagination">
+                        <li class="arrow">
+                            {% if paginate.previous %}
+                                {{ paginate.previous.title | link_to: paginate.previous.url }}
+                            {% endif %}
+                        </li>
+                        {% for part in paginate.parts %}
+                            {% if part.is_link %}
+                                <li>{{ part.title | link_to: part.url }}</li>
+                            {% else %}
+                                <li class="current"><a href>{{ part.title }}</a></li>
+                            {% endif %}
+                        {% endfor %}
+                        <li class="arrow">
+                            {% if paginate.next %}
+                                {{ paginate.next.title | link_to: paginate.next.url }}
+                            {% endif %}
+                        </li>
+                    </ul>
+                </div>
+            {% endif %}
+          
+      	</div>
+      
+  	</div>
+	
+</div>
+
+{% endpaginate %}
+
+<script>
+  /*
+	 * Product Tag Filters - Good for any number of filters on any type of
+	 * collection pages
+	 */
+  /* Give you product tag filter select element a class of coll-filter */
+  /* Give your collection select a class of coll-picker */
+  /* Brought to you by Caroline Schnapp */
+  var allFilters = jQuery('.coll-filter, .coll-picker');
+  allFilters.change(function() {
+    var newTags = [];
+    jQuery('.coll-filter').each(function() { 
+      if (jQuery(this).val()) {
+        newTags.push(jQuery(this).val());
+      }
+    });
+    
+    if (newTags.length) {
+      var query = newTags.join('+');
+      if (jQuery('.coll-picker').length) {
+        window.location.href = '/collections/' + jQuery('.coll-picker').val() + '/' + query;
+      }
+      else {
+        window.location.href = jQuery('<a title="Show products matching tag " href="/collections/"></a>').attr('href') + '/' + query;
+      }
+    } 
+    else {
+      if (jQuery('.coll-picker').length) {
+        window.location.href = '/collections/' + jQuery('.coll-picker').val();
+      }
+      else {
+        
+        window.location.href = '/collections/';
+        
+      }
+    }
+    });
+</script>
